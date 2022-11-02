@@ -9,14 +9,16 @@ import (
 )
 
 var example = `
-%[1]s --prefix <prefix> --manifest-file <manifest-file> 
+%[1]s dep 
+       --prefix <prefix> --manifest-file <manifest-file> 
        [--exclude <resource_1>]... 
 	   [--start-resource <start-resource>] 
-	   [--output-file <output-file>] [--graph-format <graph-format>]
-%[1]s --prefix <prefix> --deployment <deployment> --manifest <manifest> 
+	   [--output-file <output-file>] [--format <format>]
+%[1]s dep
+       --prefix <prefix> --deployment <deployment> --manifest <manifest> 
 	   [--exclude <resource_1>]... 
 	   [--start-resource <start-resource>]
-	   [--output-file <output-file>] [--graph-format <graph-format>]
+	   [--output-file <output-file>] [--format <format>]
 
 deployment and manifest require gcloud to be installed and 
 	the GOOGLE_APPLICATION_CREDENTIALS environement variable to be set.
@@ -52,7 +54,7 @@ func NewCmd(flags *pflag.FlagSet) *cobra.Command {
 	flags.StringVar(&o.DeploymentName, "deployment", "", "The deployment name")
 	flags.StringArrayVar(&o.Exclude, "exclude", nil, "The resources to exclude")
 	flags.StringVar(&o.StartResource, "start-resource", "", "The start resource")
-	flags.StringVar(&o.GraphFormat, "graph-format", "txt", "The graph format type")
+	flags.StringVar(&o.Format, "format", "txt", "The output format type")
 	flags.StringVar(&o.OutputFile, "output-file", "", "The graph output file")
 	flags.BoolVar(&o.Reverse, "reverse", false, "Reverse dependencies")
 

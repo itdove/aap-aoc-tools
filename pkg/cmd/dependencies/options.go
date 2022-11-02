@@ -7,7 +7,7 @@ type Options struct {
 	DeploymentName string
 	Exclude        []string
 	StartResource  string
-	GraphFormat    string
+	Format         string
 	OutputFile     string
 	Reverse        bool
 }

@@ -38,7 +38,7 @@ func (o *Options) validate() error {
 		}
 	}
 
-	if len(o.OutputFile) == 0 && o.GraphFormat != "txt" {
+	if len(o.OutputFile) == 0 && o.Format != "txt" {
 		return fmt.Errorf("an output-file must be provided")
 	}
 	return nil
@@ -81,11 +81,11 @@ func (o *Options) run() (err error) {
 		fmt.Print(*p)
 		return
 	}
-	switch o.GraphFormat {
+	switch o.Format {
 	case "txt":
 	default:
 		var out bytes.Buffer
-		cmd := exec.Command("dot", fmt.Sprintf("-T%s", o.GraphFormat))
+		cmd := exec.Command("dot", fmt.Sprintf("-T%s", o.Format))
 		cmd.Stdin = strings.NewReader(*p)
 		cmd.Stdout = &out
 		if err := cmd.Run(); err != nil {
