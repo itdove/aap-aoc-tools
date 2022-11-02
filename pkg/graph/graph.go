@@ -36,7 +36,7 @@ var _ graphgonum.Edge = &Edge{}
 func (g Graph) From(id int64) graphgonum.Nodes {
 	nodes := &Nodes{
 		Nodes: make([]Node, 0),
-		Index: 0,
+		Index: -1,
 	}
 	for _, e := range g.Edges {
 		if e.Start.UID == id {
@@ -75,7 +75,7 @@ func (n *Nodes) Next() bool {
 }
 
 func (n *Nodes) Reset() {
-	n.Index = 0
+	n.Index = -1
 }
 
 func (n Nodes) Node() graphgonum.Node {
