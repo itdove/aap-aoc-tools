@@ -13,17 +13,20 @@ var example = `
        --prefix <prefix> --manifest-file <manifest-file> 
        [--exclude <resource_1>]... 
 	   [--start-resource <start-resource>] 
-	   [--output-file <output-file>] [--format <format>]
+	   [--output-file <output-file>] 
+	   [--engine <engine>] [--options <Graphviz_options>]
 %[1]s dep
        --prefix <prefix> --deployment <deployment> --manifest <manifest> 
 	   [--exclude <resource_1>]... 
 	   [--start-resource <start-resource>]
-	   [--output-file <output-file>] [--format <format>]
+	   [--output-file <output-file>] 
+	   [--engine <engine>] [--options <Graphviz_options>]
 
 deployment and manifest require gcloud to be installed and 
 	the GOOGLE_APPLICATION_CREDENTIALS environement variable to be set.
 graph-format can be found at https://graphviz.org/docs/outputs/
-	and graphviz must be installed https://graphviz.org/download/
+	and Graphviz must be installed https://graphviz.org/download/
+	available engines are described at https://graphviz.org/docs/layouts/
 `
 
 func NewCmd(flags *pflag.FlagSet) *cobra.Command {
@@ -54,7 +57,8 @@ func NewCmd(flags *pflag.FlagSet) *cobra.Command {
 	flags.StringVar(&o.DeploymentName, "deployment", "", "The deployment name")
 	flags.StringArrayVar(&o.Exclude, "exclude", nil, "The resources to exclude")
 	flags.StringVar(&o.StartResource, "start-resource", "", "The start resource")
-	flags.StringVar(&o.Format, "format", "txt", "The output format type")
+	flags.StringVar(&o.GraphvizLayoutEngine, "engine", "dot", "The Graphviz layout engine")
+	flags.StringVar(&o.GraphvizOptions, "options", "-Ttxt", "The Graphviz options")
 	flags.StringVar(&o.OutputFile, "output-file", "", "The graph output file")
 	flags.BoolVar(&o.Reverse, "reverse", false, "Reverse dependencies")
 

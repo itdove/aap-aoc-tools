@@ -38,7 +38,7 @@ func (o *Options) validate() error {
 		}
 	}
 
-	if len(o.OutputFile) == 0 && o.Format != "txt" {
+	if len(o.OutputFile) == 0 && o.GraphvizOptions != "-Ttxt" {
 		return fmt.Errorf("an output-file must be provided")
 	}
 	return nil
@@ -81,11 +81,11 @@ func (o *Options) run() (err error) {
 		fmt.Print(*p)
 		return
 	}
-	switch o.Format {
-	case "txt":
+	switch o.GraphvizOptions {
+	case "-Ttxt":
 	default:
 		var out bytes.Buffer
-		cmd := exec.Command("dot", fmt.Sprintf("-T%s", o.Format))
+		cmd := exec.Command(o.GraphvizLayoutEngine, o.GraphvizOptions)
 		cmd.Stdin = strings.NewReader(*p)
 		cmd.Stdout = &out
 		if err := cmd.Run(); err != nil {
