@@ -2,12 +2,14 @@ package dependencies
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/ansible/aap-aoc-tools/pkg/graph"
+	"github.com/ansible/aap-aoc-tools/pkg/helpers"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	graphgonum "gonum.org/v1/gonum/graph"
@@ -38,13 +40,14 @@ func (o *Options) validate() error {
 		}
 	}
 
-	if len(o.OutputFile) == 0 && o.GraphvizOptions != "-Ttxt" {
+	if len(o.OutputFile) == 0 && o.GraphvizFlags != "-Ttxt" {
 		return fmt.Errorf("an output-file must be provided")
 	}
 	return nil
 }
 
 func (o *Options) run() (err error) {
+	ctx := context.Background()
 	var b []byte
 	if len(o.ManifestFile) != 0 {
 		b, err = os.ReadFile(o.ManifestFile)
@@ -53,9 +56,25 @@ func (o *Options) run() (err error) {
 		}
 	} else {
 		var out bytes.Buffer
-		cmd := exec.Command("gcloud", "deployment-manager", "manifests", "describe", o.ManifestName, "--deployment", o.DeploymentName)
-		cmd.Stdout = &out
-		if err := cmd.Run(); err != nil {
+		c, err := helpers.NewHTTPClient(ctx)
+		if err != nil {
+			return err
+		}
+		project, err := helpers.GetProjectID()
+		if err != nil {
+			return err
+		}
+
+		resp, err := c.Get(
+			fmt.Sprintf("https://www.googleapis.com/deploymentmanager/v2/projects/%s/global/deployments/%s/manifests/%s",
+				project,
+				o.DeploymentName,
+				o.ManifestName))
+		if err != nil {
+			return err
+		}
+		_, err = out.ReadFrom(resp.Body)
+		if err != nil {
 			return err
 		}
 		b = out.Bytes()
@@ -72,6 +91,24 @@ func (o *Options) run() (err error) {
 		return err
 	}
 	graph := graph.ReadGraph(expendedConfig, o.Exclude, o.Reverse)
+	// sort.Slice(graph.Nodes.Nodes, func(i, j int) bool {
+	// 	nameI := strings.TrimPrefix(graph.Nodes.Nodes[i].Name, o.Prefix)
+	// 	nameJ := strings.TrimPrefix(graph.Nodes.Nodes[j].Name, o.Prefix)
+	// 	return len(nameJ) < len(nameI)
+	// })
+	// for _, n := range graph.Nodes.Nodes {
+	// 	name := strings.TrimPrefix(n.Name, o.Prefix)
+	// 	fmt.Printf("len=%2d %s\n", len(name), name)
+	// }
+	// l := 0
+	// maxNode := ""
+	// for _, n := range graph.Nodes.Nodes {
+	// 	if len(n.Name) > l {
+	// 		l = len(n.Name)
+	// 		maxNode = n.Name
+	// 	}
+	// }
+	// fmt.Printf("name %s max len %d ", maxNode, l)
 	p, err := o.stringGraph(graph, o.StartResource)
 	if err != nil {
 		fmt.Println(err)
@@ -81,11 +118,11 @@ func (o *Options) run() (err error) {
 		fmt.Print(*p)
 		return
 	}
-	switch o.GraphvizOptions {
+	switch o.GraphvizFlags {
 	case "-Ttxt":
 	default:
 		var out bytes.Buffer
-		cmd := exec.Command(o.GraphvizLayoutEngine, o.GraphvizOptions)
+		cmd := exec.Command(o.GraphvizLayoutEngine, o.GraphvizFlags)
 		cmd.Stdin = strings.NewReader(*p)
 		cmd.Stdout = &out
 		if err := cmd.Run(); err != nil {
