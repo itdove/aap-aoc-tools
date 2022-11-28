@@ -8,9 +8,10 @@ type Options struct {
 	Exclude              []string
 	StartResource        string
 	GraphvizLayoutEngine string
-	GraphvizOptions      string
+	GraphvizFlags        string
 	OutputFile           string
 	Reverse              bool
+	Project              string
 }
 
 func newOptions() *Options {
